@@ -239,7 +239,7 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
         }
         install.rb {
             configure.cmd       ${ruby.bin} -rvendor-specific install.rb
-            configure.pre_args  config
+            configure.pre_args  config --bin-dir=${destroot}${ruby.bindir}
 
             build.cmd           ${ruby.bin} -rvendor-specific install.rb
             build.target        setup
