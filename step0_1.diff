@@ -1,0 +1,198 @@
+Only in port-step1: .gitignore
+Only in port-step1: PortIndex
+Only in port-step1: PortIndex.quick
+diff -ur port-step0/_resources/port1.0/group/ruby-1.0.tcl port-step1/_resources/port1.0/group/ruby-1.0.tcl
+--- port-step0/_resources/port1.0/group/ruby-1.0.tcl	2013-03-02 10:40:01.000000000 +0900
++++ port-step1/_resources/port1.0/group/ruby-1.0.tcl	2013-03-02 14:17:28.000000000 +0900
+@@ -57,6 +57,10 @@
+ set ruby.project    ""
+ set ruby.docs       {}
+ set ruby.srcdir     ""
++set ruby.bindir     ""
++
++options ruby.link_binaries
++default ruby.link_binaries yes
+ 
+ # ruby group setup procedure; optional for ruby 1.8 if you want only
+ # basic variables, like ruby.lib and ruby.archlib.
+@@ -64,17 +68,20 @@
+     global destroot prefix worksrcpath os.platform
+     global ruby.bin ruby.rdoc ruby.gem
+     global ruby.version ruby.lib
+-    global ruby.module ruby.filename ruby.project ruby.docs ruby.srcdir
++    global ruby.module ruby.filename ruby.project ruby.docs ruby.srcdir ruby.bindir
+     global ruby.prog_suffix
++    global ruby.link_binaries_suffix
+ 
+     if {${implementation} eq "ruby19"} {
+         set ruby.port_prefix rb19
+         set ruby.prog_suffix "1.9"
++        set ruby.libexec_suffix "1.9"
+     } elseif {${implementation} eq "ruby"} {
+         # ruby.bin, ruby.rdoc, and ruby.gem set to 1.8 by default
+         set ruby.port_prefix rb
+         # no program suffix by default, so leave as blank
+         set ruby.prog_suffix ""
++        set ruby.libexec_suffix "1.8"
+     } else {
+         ui_error "ruby.setup: unknown implementation '${implementation}' specified (ruby, ruby19 possible)"
+         return -code error "ruby.setup failed"
+@@ -82,6 +89,8 @@
+     set ruby.bin    ${prefix}/bin/ruby${ruby.prog_suffix}
+     set ruby.rdoc   ${prefix}/bin/rdoc${ruby.prog_suffix}
+     set ruby.gem    ${prefix}/bin/gem${ruby.prog_suffix}
++    set ruby.bindir ${prefix}/libexec/ruby${ruby.libexec_suffix}
++    set ruby.link_binaries_suffix -${ruby.libexec_suffix}
+ 
+     # define ruby global names and lists
+     # check if module is a list or string
+@@ -199,6 +208,11 @@
+             destroot.cmd    ${ruby.bin} -rvendor-specific -rdestroot install.rb
+             destroot.target
+             destroot.destdir
++            post-destroot {
++                foreach file [readdir ${destroot}${prefix}/bin] {
++                    move [file join ${destroot}${prefix}/bin $file] ${destroot}${ruby.bindir}
++                }
++            }
+         }
+         copy_install:* {
+             set ruby.srcdir [lindex [split ${type} {:}] 1]
+@@ -225,7 +239,7 @@
+         }
+         install.rb {
+             configure.cmd       ${ruby.bin} -rvendor-specific install.rb
+-            configure.pre_args  config
++            configure.pre_args  config --bin-dir=${destroot}${ruby.bindir}
+ 
+             build.cmd           ${ruby.bin} -rvendor-specific install.rb
+             build.target        setup
+@@ -246,7 +260,7 @@
+         }
+         setup.rb {
+             configure.cmd       ${ruby.bin} -rvendor-specific setup.rb
+-            configure.pre_args  config
++            configure.pre_args  config --bindir=${ruby.bindir}
+ 
+             build.cmd           ${ruby.bin} -rvendor-specific setup.rb
+             build.target        setup
+@@ -273,6 +287,11 @@
+             build.args          RUBY="${ruby.bin} -rvendor-specific"
+ 
+             destroot.args       RUBY="${ruby.bin} -rvendor-specific"
++            post-destroot {
++                foreach file [readdir ${destroot}${prefix}/bin] {
++                    move [file join ${destroot}${prefix}/bin $file] ${destroot}${ruby.bindir}
++                }
++            }
+         }
+         gnu {
+             build.args          RUBY="${ruby.bin} -rvendor-specific"
+@@ -310,7 +329,7 @@
+                 set binDir ${destroot}${prefix}/lib/ruby${ruby.prog_suffix}/gems/${ruby.version}/bin
+                 if {[file isdirectory $binDir]} {
+                     foreach file [readdir $binDir] {
+-                        file copy [file join $binDir $file] ${destroot}${prefix}/bin
++                        file copy [file join $binDir $file] ${destroot}${ruby.bindir}
+                     }
+                 }
+             }
+@@ -329,7 +348,18 @@
+         configure.universal_args-delete  --disable-dependency-tracking
+     }
+ 
++    pre-destroot {
++        xinstall -d -m 0755 ${destroot}${ruby.bindir}
++    }
++
+     post-destroot {
++        if {${ruby.link_binaries}} {
++            foreach bin [glob -nocomplain -tails -directory "${destroot}${ruby.bindir}" *] {
++                if {[catch {file type "${destroot}${prefix}/bin/${bin}${ruby.link_binaries_suffix}"}]} {
++                    ln -s "${ruby.bindir}/${bin}" "${destroot}${prefix}/bin/${bin}${ruby.link_binaries_suffix}"
++                }
++            }
++        }
+         # Install documentation files (if specified)
+         if {[llength ${ruby.docs}] > 0} {
+             set docPath ${prefix}/share/doc/${name}
+diff -ur port-step0/lang/ruby/Portfile port-step1/lang/ruby/Portfile
+--- port-step0/lang/ruby/Portfile	2013-03-02 08:51:28.000000000 +0900
++++ port-step1/lang/ruby/Portfile	2013-03-02 10:52:54.000000000 +0900
+@@ -143,6 +143,9 @@
+ 			destroot.keepdirs-append ${subdir}
+ 		}
+ 	}
++	# install destination of commands from port:rb-*
++	xinstall -m 0755 -d ${destroot}${prefix}/libexec/ruby1.8
++	destroot.keepdirs-append ${destroot}${prefix}/libexec/ruby1.8
+     # error at activate, for these case sensitive files
+ 	foreach rdoc {Exception2MessageMapper/fail-i.yaml \
+ 				  REXML/Parsers/XPathParser/predicate-i.yaml} {
+diff -ur port-step0/lang/ruby19/Portfile port-step1/lang/ruby19/Portfile
+--- port-step0/lang/ruby19/Portfile	2013-03-02 08:51:41.000000000 +0900
++++ port-step1/lang/ruby19/Portfile	2013-03-02 10:57:20.000000000 +0900
+@@ -86,6 +86,10 @@
+ 			destroot.keepdirs-append ${subdir}
+ 	}
+ 
++	# install destination of commands from port:rb-*
++	xinstall -m 0755 -d ${destroot}${prefix}/libexec/ruby1.9
++	destroot.keepdirs-append ${destroot}${prefix}/libexec/ruby1.9
++
+     # error at activate, for these case sensitive files
+ 	foreach rdoc {Exception2MessageMapper/fail-i.yaml \
+ 				  REXML/Parsers/XPathParser/predicate-i.yaml} {
+diff -ur port-step0/ruby/rb-archive-tar-minitar/Portfile port-step1/ruby/rb-archive-tar-minitar/Portfile
+--- port-step0/ruby/rb-archive-tar-minitar/Portfile	2012-05-29 13:50:18.000000000 +0900
++++ port-step1/ruby/rb-archive-tar-minitar/Portfile	2013-03-02 13:13:10.000000000 +0900
+@@ -21,6 +21,7 @@
+ 
+ destroot.args	--no-ri --no-tests
+ post-destroot {
+-	reinplace "s%#!.*ruby%#!${ruby.bin}%" ${destroot}${prefix}/bin/minitar
+-	file delete -force ${destroot}${prefix}/bin/minitar.bat
++	reinplace -locale C "s%#!.*ruby%#!${ruby.bin}%" ${destroot}${ruby.bindir}/minitar
++	file delete -force ${destroot}${prefix}/bin/minitar.bat${ruby.link_binaries_suffix}
++	file delete -force ${destroot}${ruby.bindir}/minitar.bat
+ }
+diff -ur port-step0/ruby/rb-cvs/Portfile port-step1/ruby/rb-cvs/Portfile
+--- port-step0/ruby/rb-cvs/Portfile	2010-09-24 21:21:50.000000000 +0900
++++ port-step1/ruby/rb-cvs/Portfile	2013-03-02 13:33:01.000000000 +0900
+@@ -15,6 +15,8 @@
+ checksums		    md5 4e40b597ba43ef8ecc8b0fdce22119bd
+ post-destroot       {
+                         reinplace "s;/usr/local/bin/ruby;${ruby.bin};" ${worksrcpath}/viztree
+-                        xinstall -m 0755 ${worksrcpath}/viztree ${destroot}${prefix}/bin
++                        xinstall -m 0755 ${worksrcpath}/viztree ${destroot}${ruby.bindir}
++                        # install commands at post-destroot, need to make symlink in portfile
++                        ln -s ${ruby.bindir}/viztree ${destroot}${prefix}/bin/viztree${ruby.link_binaries_suffix}
+                     }
+ platforms		    darwin 
+Only in port-step1/ruby/rb-htaccess: work
+diff -ur port-step0/ruby/rb-pdumpfs/Portfile port-step1/ruby/rb-pdumpfs/Portfile
+--- port-step0/ruby/rb-pdumpfs/Portfile	2013-03-02 08:55:02.000000000 +0900
++++ port-step1/ruby/rb-pdumpfs/Portfile	2013-03-02 12:23:22.000000000 +0900
+@@ -33,8 +33,8 @@
+ test.target		check
+ 
+ destroot {
+-	xinstall -d -m 0755 ${destroot}${prefix}/bin
+-	xinstall -m 0755 ${worksrcpath}/pdumpfs ${destroot}${prefix}/bin
++	xinstall -d -m 0755 ${destroot}${ruby.bindir}
++	xinstall -m 0755 ${worksrcpath}/pdumpfs ${destroot}${ruby.bindir}
+ 	xinstall -d -m 0755 ${destroot}${prefix}/share/man/man8
+ 	xinstall -m 0644 ${worksrcpath}/man/man8/pdumpfs.8 \
+ 					 ${destroot}${prefix}/share/man/man8
+Only in port-step1/ruby/rb-pdumpfs: work
+diff -ur port-step0/ruby/rb19-nanoc3/Portfile port-step1/ruby/rb19-nanoc3/Portfile
+--- port-step0/ruby/rb19-nanoc3/Portfile	2013-03-02 08:53:31.000000000 +0900
++++ port-step1/ruby/rb19-nanoc3/Portfile	2013-03-02 11:16:26.000000000 +0900
+@@ -3,7 +3,6 @@
+ PortGroup           ruby 1.0
+ 
+ ruby.setup          nanoc3 3.1.3 gem {} rubygems ruby19
+-conflicts           rb-nanoc3
+ description         A Ruby site compiler that produces static HTML
+ long_description    \
+     nanoc is a tool for building static web sites. It can transform content \
