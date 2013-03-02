@@ -287,6 +287,11 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
             build.args          RUBY="${ruby.bin} -rvendor-specific"
 
             destroot.args       RUBY="${ruby.bin} -rvendor-specific"
+            post-destroot {
+                foreach file [readdir ${destroot}${prefix}/bin] {
+                    move [file join ${destroot}${prefix}/bin $file] ${destroot}${ruby.bindir}
+                }
+            }
         }
         gnu {
             build.args          RUBY="${ruby.bin} -rvendor-specific"
