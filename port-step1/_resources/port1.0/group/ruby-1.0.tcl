@@ -57,6 +57,10 @@ set ruby.filename   ""
 set ruby.project    ""
 set ruby.docs       {}
 set ruby.srcdir     ""
+set ruby.bindir     ""
+
+options ruby.link_binaries
+default ruby.link_binaries yes
 
 # ruby group setup procedure; optional for ruby 1.8 if you want only
 # basic variables, like ruby.lib and ruby.archlib.
@@ -64,17 +68,20 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
     global destroot prefix worksrcpath os.platform
     global ruby.bin ruby.rdoc ruby.gem
     global ruby.version ruby.lib
-    global ruby.module ruby.filename ruby.project ruby.docs ruby.srcdir
+    global ruby.module ruby.filename ruby.project ruby.docs ruby.srcdir ruby.bindir
     global ruby.prog_suffix
+    global ruby.link_binaries_suffix
 
     if {${implementation} eq "ruby19"} {
         set ruby.port_prefix rb19
         set ruby.prog_suffix "1.9"
+        set ruby.libexec_suffix "1.9"
     } elseif {${implementation} eq "ruby"} {
         # ruby.bin, ruby.rdoc, and ruby.gem set to 1.8 by default
         set ruby.port_prefix rb
         # no program suffix by default, so leave as blank
         set ruby.prog_suffix ""
+        set ruby.libexec_suffix "1.8"
     } else {
         ui_error "ruby.setup: unknown implementation '${implementation}' specified (ruby, ruby19 possible)"
         return -code error "ruby.setup failed"
@@ -82,6 +89,8 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
     set ruby.bin    ${prefix}/bin/ruby${ruby.prog_suffix}
     set ruby.rdoc   ${prefix}/bin/rdoc${ruby.prog_suffix}
     set ruby.gem    ${prefix}/bin/gem${ruby.prog_suffix}
+    set ruby.bindir ${prefix}/libexec/ruby${ruby.libexec_suffix}
+    set ruby.link_binaries_suffix -${ruby.libexec_suffix}
 
     # define ruby global names and lists
     # check if module is a list or string
@@ -310,7 +319,7 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
                 set binDir ${destroot}${prefix}/lib/ruby${ruby.prog_suffix}/gems/${ruby.version}/bin
                 if {[file isdirectory $binDir]} {
                     foreach file [readdir $binDir] {
-                        file copy [file join $binDir $file] ${destroot}${prefix}/bin
+                        file copy [file join $binDir $file] ${destroot}${ruby.bindir}
                     }
                 }
             }
@@ -329,7 +338,18 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
         configure.universal_args-delete  --disable-dependency-tracking
     }
 
+    pre-destroot {
+        xinstall -d -m 0755 ${destroot}${ruby.bindir}
+    }
+
     post-destroot {
+        if {${ruby.link_binaries}} {
+            foreach bin [glob -nocomplain -tails -directory "${destroot}${ruby.bindir}" *] {
+                if {[catch {file type "${destroot}${prefix}/bin/${bin}${ruby.link_binaries_suffix}"}]} {
+                    ln -s "${ruby.bindir}/${bin}" "${destroot}${prefix}/bin/${bin}${ruby.link_binaries_suffix}"
+                }
+            }
+        }
         # Install documentation files (if specified)
         if {[llength ${ruby.docs}] > 0} {
             set docPath ${prefix}/share/doc/${name}
