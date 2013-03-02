@@ -143,6 +143,9 @@ post-destroot {
 			destroot.keepdirs-append ${subdir}
 		}
 	}
+	# install destination of commands from port:rb-*
+	xinstall -m 0755 -d ${destroot}${prefix}/libexec/ruby1.8
+	destroot.keepdirs-append ${destroot}${prefix}/libexec/ruby1.8
     # error at activate, for these case sensitive files
 	foreach rdoc {Exception2MessageMapper/fail-i.yaml \
 				  REXML/Parsers/XPathParser/predicate-i.yaml} {
