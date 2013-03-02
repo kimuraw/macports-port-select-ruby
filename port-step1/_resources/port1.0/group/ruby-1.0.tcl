@@ -255,7 +255,7 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
         }
         setup.rb {
             configure.cmd       ${ruby.bin} -rvendor-specific setup.rb
-            configure.pre_args  config
+            configure.pre_args  config --bindir=${ruby.bindir}
 
             build.cmd           ${ruby.bin} -rvendor-specific setup.rb
             build.target        setup
