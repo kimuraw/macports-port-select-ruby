@@ -208,6 +208,11 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
             destroot.cmd    ${ruby.bin} -rvendor-specific -rdestroot install.rb
             destroot.target
             destroot.destdir
+            post-destroot {
+                foreach file [readdir ${destroot}${prefix}/bin] {
+                    move [file join ${destroot}${prefix}/bin $file] ${destroot}${ruby.bindir}
+                }
+            }
         }
         copy_install:* {
             set ruby.srcdir [lindex [split ${type} {:}] 1]
