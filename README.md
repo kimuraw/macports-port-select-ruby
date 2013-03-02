@@ -55,6 +55,8 @@ avoid conflicts of commands from rb-* and rb19-*.
 * modify PortGroup ruby
 * modify port:ruby and port:ruby19
     * generate ${prefix}/libexec/ruby-[1.8|1.9] as destroot.keepdirs
+* modify port:rb-* and rb19-*
+    * change target of reinplace
 
 
 Step 2: introduce `port select ruby`
@@ -67,4 +69,17 @@ Step 2: introduce `port select ruby`
 * modify port:ruby19
     * remove variant "nosuffix"
     * add PortGroup select
+
+Note
+----
+
+port samples of each style:
+
+* basic_install - rb-archive-tar-minitar
+* copy_install - rb-cvs
+* extconf.rb - rb-password
+* gem - rb-nanoc3, rb19-nanoc3
+* gnu - rb-pdumpfs
+* install.rb - rb-htaccess?
+* setup.rb - rb-hikidoc
 
