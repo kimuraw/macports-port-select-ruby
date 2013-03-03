@@ -1,0 +1,10 @@
+--- port_contents_ruby19.bef	2013-03-04 00:17:03.000000000 +0900
++++ port_contents_ruby19.select	2013-03-04 00:24:50.000000000 +0900
+@@ -7,6 +7,7 @@
+   /opt/local/bin/ri1.9
+   /opt/local/bin/ruby1.9
+   /opt/local/bin/testrb1.9
++  /opt/local/etc/select/ruby/ruby19
+   /opt/local/include/ruby-1.9.1/ruby.h
+   /opt/local/include/ruby-1.9.1/ruby/backward/classext.h
+   /opt/local/include/ruby-1.9.1/ruby/backward/rubyio.h

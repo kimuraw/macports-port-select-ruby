@@ -1,6 +1,7 @@
 # $Id: Portfile 103423 2013-02-25 14:46:30Z kimuraw@macports.org $
 
 PortSystem			1.0
+PortGroup			select 1.0
 
 name				ruby19
 version				1.9.3-p392
@@ -40,6 +41,10 @@ depends_lib			port:libiconv \
 					port:libyaml \
 					port:libffi \
 					port:gdbm
+depends_run			port:ruby_select
+
+select.group		ruby
+select.file			${filespath}/ruby19
 
 default_variants	+doc
 
