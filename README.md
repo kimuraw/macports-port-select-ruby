@@ -85,3 +85,6 @@ port samples of each style:
 * install.rb - rb-htaccess?
 * setup.rb - rb-hikidoc
 
+see https://gist.github.com/kimuraw/5068437 for numbers of ruby.setup styles.
+
+
