@@ -8,6 +8,7 @@ concept
 
 * add suffix "1.8" to commands from port:ruby
 * install commands from port:[rb|rb19]-* under libexec/ruby-[1.8|1.9] (like perl5 ports)
+* add port:ruby_select
 
 file hierarchy
 --------------
@@ -33,10 +34,10 @@ files from port:ruby and port:ruby19:
         ruby-1.8/ - commands from port:rb-* without suffix
         ruby-1.9/ - commands from port:rb19-* without suffix
     ${prefix}/etc/select/ruby
-        base
-        none
-        ruby18
-        ruby19
+        base   - port:ruby_select
+        non    - port:ruby_select
+        ruby18 - port:ruby
+        ruby19 - port:ruby19
 
 example of rb-nanoc3 and rb19-nanoc3:
 
@@ -69,6 +70,7 @@ Step 2: introduce `port select ruby`
 * modify port:ruby19
     * remove variant "nosuffix"
     * add PortGroup select
+* add port:select
 
 Note
 ----
