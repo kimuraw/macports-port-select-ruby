@@ -117,16 +117,6 @@ pre-activate {
 	}
 }
 
-variant nosuffix description "Don't add the 1.9 program suffix to the executables" {
-    conflicts ruby ruby186 rb-rubygems rb-rake
-    post-destroot {
-        # make symlinks no-suffixed binaries
-        foreach file {erb gem irb rake rdoc ri ruby testrb} {
-            ln -s ${prefix}/bin/${file}1.9 ${destroot}${prefix}/bin/${file}
-        }
-    }
-}
-
 variant c_api_docs description "Generate documentation for Ruby C API" {
 	depends_build-append port:doxygen
 
