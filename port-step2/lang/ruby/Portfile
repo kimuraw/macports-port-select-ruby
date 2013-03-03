@@ -25,7 +25,7 @@ master_sites	ruby:1.8
 dist_subdir		ruby
 checksums       md5 c27526b298659a186bdb5107fcec2341 \
 				rmd160 ad1da5b8b8e818d6a77b70ab81586a37099cbac0 \
-				aha1 2a709358417330cfacba6b9f8206eab577640b2b \
+				sha1 2a709358417330cfacba6b9f8206eab577640b2b \
 				sha256 2dd0e463cd82039beb75c9b9f4ee20bef5f5b5ff68527008e5aee61cfb3b55e1
 
 use_bzip2		yes
