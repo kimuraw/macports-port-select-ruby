@@ -1,0 +1,150 @@
+diff -urN port-step1/lang/ruby/Portfile port-step2/lang/ruby/Portfile
+--- port-step1/lang/ruby/Portfile	2013-03-02 10:52:54.000000000 +0900
++++ port-step2/lang/ruby/Portfile	2013-03-04 00:37:33.000000000 +0900
+@@ -3,6 +3,7 @@
+ PortSystem		1.0
+ PortGroup		muniversal 1.0
+ PortGroup               compiler_blacklist_versions 1.0
++PortGroup		select 1.0
+ 
+ name			ruby
+ version			1.8.7-p371
+@@ -37,6 +38,10 @@
+ 				port:zlib \
+ 				port:ncurses \
+ 				port:gdbm
++depends_run		port:ruby_select
++
++select.group	ruby
++select.file		${filespath}/ruby18
+ 
+ # vendordir: enable vendor-specific.rb
+ # #3604: gcc4 fails to detect linking at configure
+@@ -99,10 +104,16 @@
+ 				--enable-pthread \
+ 				--without-tk \
+ 				--with-vendordir=${prefix}/lib/ruby/vendor_ruby \
+-				--with-opt-dir=${prefix}
++				--with-opt-dir=${prefix} \
++				--program-suffix=1.8
+ # ignore minor version for archdir, like i686-darwin9
+ configure.env	UNAME_RELEASE=${os.major}
+ 
++# force libruby without suffix (backward compatibility)
++post-configure {
++	reinplace "s|^RUBY_SO_NAME=.*|RUBY_SO_NAME=ruby|" ${worksrcpath}/Makefile
++}
++
+ if {[variant_isset universal]} {
+ 	# NOTE: directory layout of port:ruby +universal
+ 	#   universal binary
+diff -urN port-step1/lang/ruby/files/ruby18 port-step2/lang/ruby/files/ruby18
+--- port-step1/lang/ruby/files/ruby18	1970-01-01 09:00:00.000000000 +0900
++++ port-step2/lang/ruby/files/ruby18	2013-03-03 22:45:04.000000000 +0900
+@@ -0,0 +1,13 @@
++bin/erb1.8
++-
++bin/irb1.8
++-
++bin/rdoc1.8
++bin/ri1.8
++bin/ruby1.8
++bin/testrb1.8
++-
++-
++-
++-
++share/man/man1/ruby1.8.1.gz
+diff -urN port-step1/lang/ruby19/Portfile port-step2/lang/ruby19/Portfile
+--- port-step1/lang/ruby19/Portfile	2013-03-02 10:57:20.000000000 +0900
++++ port-step2/lang/ruby19/Portfile	2013-03-04 00:18:11.000000000 +0900
+@@ -1,6 +1,7 @@
+ # $Id: Portfile 103423 2013-02-25 14:46:30Z kimuraw@macports.org $
+ 
+ PortSystem			1.0
++PortGroup			select 1.0
+ 
+ name				ruby19
+ version				1.9.3-p392
+@@ -40,6 +41,10 @@
+ 					port:libyaml \
+ 					port:libffi \
+ 					port:gdbm
++depends_run			port:ruby_select
++
++select.group		ruby
++select.file			${filespath}/ruby19
+ 
+ default_variants	+doc
+ 
+diff -urN port-step1/lang/ruby19/files/ruby19 port-step2/lang/ruby19/files/ruby19
+--- port-step1/lang/ruby19/files/ruby19	1970-01-01 09:00:00.000000000 +0900
++++ port-step2/lang/ruby19/files/ruby19	2013-03-04 00:21:26.000000000 +0900
+@@ -0,0 +1,13 @@
++bin/erb1.9
++bin/gem1.9
++bin/irb1.9
++bin/rake1.9
++bin/rdoc1.9
++bin/ri1.9
++bin/ruby1.9
++bin/testrb1.9
++share/man/man1/erb1.9.1.gz
++share/man/man1/irb1.9.1.gz
++share/man/man1/rake1.9.1.gz
++share/man/man1/ri1.9.1.gz
++share/man/man1/ruby1.9.1.gz
+diff -urN port-step1/sysutils/ruby_select/Portfile port-step2/sysutils/ruby_select/Portfile
+--- port-step1/sysutils/ruby_select/Portfile	1970-01-01 09:00:00.000000000 +0900
++++ port-step2/sysutils/ruby_select/Portfile	2013-03-03 22:15:50.000000000 +0900
+@@ -0,0 +1,33 @@
++# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
++# $Id: $
++
++PortSystem          1.0
++PortGroup           select 1.0
++
++name                ruby_select
++version             1.0
++categories          sysutils lang
++platforms           darwin
++maintainers         kimuraw openmaintainer
++license             BSD
++supported_archs     noarch
++
++description         common files for selecting default Ruby version
++
++long_description    This port installs files that allow 'port select' to be \
++                    used to create links to the preferred default version of Ruby.
++
++homepage            http://www.macports.org/
++
++distfiles
++
++use_configure       no
++
++build               {}
++
++destroot {
++    select::install ruby ${filespath}/base
++    select::install ruby ${filespath}/none
++}
++
++livecheck.type      none
+diff -urN port-step1/sysutils/ruby_select/files/base port-step2/sysutils/ruby_select/files/base
+--- port-step1/sysutils/ruby_select/files/base	1970-01-01 09:00:00.000000000 +0900
++++ port-step2/sysutils/ruby_select/files/base	2013-03-03 22:36:58.000000000 +0900
+@@ -0,0 +1,13 @@
++bin/erb
++bin/gem
++bin/irb
++bin/rake
++bin/rdoc
++bin/ri
++bin/ruby
++bin/testrb
++share/man/man1/erb.1.gz
++share/man/man1/irb.1.gz
++share/man/man1/rake.1.gz
++share/man/man1/ri.1.gz
++share/man/man1/ruby.1.gz
