@@ -7,7 +7,7 @@ concept
 -------
 
 * add suffix "1.8" to commands from port:ruby
-* install commands from port:[rb|rb19]-* under libexec/ruby-[1.8|1.9], like perl5 ports
+* install commands from port:[rb|rb19]-* under libexec/ruby[1.8|1.9], like perl5 ports
 * add port:ruby_select
 
 file hierarchy
@@ -31,8 +31,8 @@ files from port:ruby and port:ruby19:
         ri1.9
         testrb1.9
     ${prefix}/libexec/
-        ruby-1.8/ - commands from port:rb-* without suffix
-        ruby-1.9/ - commands from port:rb19-* without suffix
+        ruby1.8/ - commands from port:rb-* without suffix
+        ruby1.9/ - commands from port:rb19-* without suffix
     ${prefix}/etc/select/ruby
         base   - port:ruby_select
         non    - port:ruby_select
@@ -45,8 +45,8 @@ example of rb-nanoc3 and rb19-nanoc3:
         nanoc3-1.8
         nanoc3-1.9
     ${prefix}/libexec/
-        ruby-1.8/nanoc3
-        ruby-1.9/nanoc3
+        ruby1.8/nanoc3
+        ruby1.9/nanoc3
 
 Step 1: change install destination of commands from rb|rb19-port
 ----------------------------------------------------------------
@@ -55,7 +55,7 @@ avoid conflicts of commands from rb-* and rb19-*.
 
 * modify PortGroup ruby
 * modify port:ruby and port:ruby19
-    * generate ${prefix}/libexec/ruby-[1.8|1.9] as destroot.keepdirs
+    * generate ${prefix}/libexec/ruby[1.8|1.9] as destroot.keepdirs
 * modify port:rb-* and rb19-*
     * change target of reinplace
 
