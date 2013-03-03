@@ -3,6 +3,7 @@
 PortSystem		1.0
 PortGroup		muniversal 1.0
 PortGroup               compiler_blacklist_versions 1.0
+PortGroup		select 1.0
 
 name			ruby
 version			1.8.7-p371
@@ -24,7 +25,7 @@ master_sites	ruby:1.8
 dist_subdir		ruby
 checksums       md5 c27526b298659a186bdb5107fcec2341 \
 				rmd160 ad1da5b8b8e818d6a77b70ab81586a37099cbac0 \
-				sha1 2a709358417330cfacba6b9f8206eab577640b2b \
+				aha1 2a709358417330cfacba6b9f8206eab577640b2b \
 				sha256 2dd0e463cd82039beb75c9b9f4ee20bef5f5b5ff68527008e5aee61cfb3b55e1
 
 use_bzip2		yes
@@ -37,6 +38,10 @@ depends_lib		port:libiconv \
 				port:zlib \
 				port:ncurses \
 				port:gdbm
+depends_run		port:ruby_select
+
+select.group	ruby
+select.file		${filespath}/ruby18
 
 # vendordir: enable vendor-specific.rb
 # #3604: gcc4 fails to detect linking at configure
@@ -99,9 +104,15 @@ configure.args	--enable-shared \
 				--enable-pthread \
 				--without-tk \
 				--with-vendordir=${prefix}/lib/ruby/vendor_ruby \
-				--with-opt-dir=${prefix}
+				--with-opt-dir=${prefix} \
+				--program-suffix=1.8
 # ignore minor version for archdir, like i686-darwin9
 configure.env	UNAME_RELEASE=${os.major}
+
+# force libruby without suffix (backward compatibility)
+post-configure {
+	reinplace "s|^RUBY_SO_NAME=.*|RUBY_SO_NAME=ruby|" ${worksrcpath}/Makefile
+}
 
 if {[variant_isset universal]} {
 	# NOTE: directory layout of port:ruby +universal

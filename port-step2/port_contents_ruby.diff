@@ -1,0 +1,30 @@
+--- port_contents_ruby.bef	2013-03-03 23:23:03.000000000 +0900
++++ port_contents_ruby.suffixed	2013-03-04 00:09:02.000000000 +0900
+@@ -1,10 +1,11 @@
+ Port ruby contains:
+-  /opt/local/bin/erb
+-  /opt/local/bin/irb
+-  /opt/local/bin/rdoc
+-  /opt/local/bin/ri
+-  /opt/local/bin/ruby
+-  /opt/local/bin/testrb
++  /opt/local/bin/erb1.8
++  /opt/local/bin/irb1.8
++  /opt/local/bin/rdoc1.8
++  /opt/local/bin/ri1.8
++  /opt/local/bin/ruby1.8
++  /opt/local/bin/testrb1.8
++  /opt/local/etc/select/ruby/ruby18
+   /opt/local/lib/libruby-static.a
+   /opt/local/lib/libruby.1.8.7.dylib
+   /opt/local/lib/libruby.1.8.dylib
+@@ -609,7 +610,8 @@
+   /opt/local/lib/ruby/site_ruby/1.8/site-specific.rb
+   /opt/local/lib/ruby/vendor_ruby/1.8/i686-darwin12/.turd_ruby
+   /opt/local/lib/ruby/vendor_ruby/1.8/vendor-specific.rb
+-  /opt/local/share/man/man1/ruby.1.gz
++  /opt/local/libexec/ruby1.8/.turd_ruby
++  /opt/local/share/man/man1/ruby1.8.1.gz
+   /opt/local/share/ri/1.8/system/ACL/ACLEntry/cdesc-ACLEntry.yaml
+   /opt/local/share/ri/1.8/system/ACL/ACLEntry/dot_pat-i.yaml
+   /opt/local/share/ri/1.8/system/ACL/ACLEntry/dot_pat_str-i.yaml
