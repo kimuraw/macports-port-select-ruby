@@ -35,7 +35,7 @@ files from port:ruby and port:ruby19:
         ruby1.9/ - commands from port:rb19-* without suffix
     ${prefix}/etc/select/ruby
         base   - port:ruby_select
-        non    - port:ruby_select
+        none   - port:ruby_select
         ruby18 - port:ruby
         ruby19 - port:ruby19
 
