@@ -70,7 +70,7 @@ Step 2: introduce `port select ruby`
 * modify port:ruby19
     * remove variant "nosuffix"
     * add PortGroup select
-* add port:select
+* add port:ruby_select
 
 Note
 ----
