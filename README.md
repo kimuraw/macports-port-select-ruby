@@ -7,7 +7,7 @@ concept
 -------
 
 * add suffix "1.8" to commands from port:ruby
-* install commands from port:[rb|rb19]-* under libexec/ruby-[1.8|1.9] (like perl5 ports)
+* install commands from port:[rb|rb19]-* under libexec/ruby-[1.8|1.9], like perl5 ports
 * add port:ruby_select
 
 file hierarchy
