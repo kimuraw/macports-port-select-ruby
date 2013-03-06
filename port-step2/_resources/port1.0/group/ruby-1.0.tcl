@@ -30,12 +30,24 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+options ruby.default_branch
+default ruby.default_branch {[ruby_get_default_branch]}
+proc ruby_get_default_branch {} {
+    global prefix
+    # use whatever ${prefix}/bin/ruby was chosen, and if none, fall back to 1.9
+    if {![catch {set val [lindex [split [exec ${prefix}/bin/ruby --version] { }] 1]}]} {
+        return [join [lrange [split $val .] 0 1] .]
+    } else {
+        return 1.9
+    }
+}
+
 # Define these variables assuming ruby1.8 to make them accessible in
 # the portfile after port group declaration. They can be modified by
 # ruby.setup, e.g. to use another ruby than 1.8.
-set ruby.bin            ${prefix}/bin/ruby
-set ruby.rdoc           ${prefix}/bin/rdoc
-set ruby.gem            ${prefix}/bin/gem
+set ruby.bin            ${prefix}/bin/ruby${ruby.default_branch}
+set ruby.rdoc           ${prefix}/bin/rdoc${ruby.default_branch}
+set ruby.gem            ${prefix}/bin/gem${ruby.default_branch}
 
 proc ruby.extract_config {var {default ""}} {
     global ruby.bin
