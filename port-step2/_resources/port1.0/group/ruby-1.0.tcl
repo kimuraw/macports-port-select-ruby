@@ -79,8 +79,7 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
     } elseif {${implementation} eq "ruby"} {
         # ruby.bin, ruby.rdoc, and ruby.gem set to 1.8 by default
         set ruby.port_prefix rb
-        # no program suffix by default, so leave as blank
-        set ruby.prog_suffix ""
+        set ruby.prog_suffix "1.8"
         set ruby.libexec_suffix "1.8"
     } else {
         ui_error "ruby.setup: unknown implementation '${implementation}' specified (ruby, ruby19 possible)"
