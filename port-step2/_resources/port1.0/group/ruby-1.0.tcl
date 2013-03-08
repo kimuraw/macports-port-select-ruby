@@ -34,11 +34,11 @@ options ruby.default_branch
 default ruby.default_branch {[ruby_get_default_branch]}
 proc ruby_get_default_branch {} {
     global prefix
-    # use whatever ${prefix}/bin/ruby was chosen, and if none, fall back to 1.9
+    # use whatever ${prefix}/bin/ruby was chosen, and if none, fall back to 1.8
     if {![catch {set val [lindex [split [exec ${prefix}/bin/ruby --version] { }] 1]}]} {
         return [join [lrange [split $val .] 0 1] .]
     } else {
-        return 1.9
+        return 1.8
     }
 }
 
