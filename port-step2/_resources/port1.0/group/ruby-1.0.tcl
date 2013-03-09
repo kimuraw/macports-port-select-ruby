@@ -126,11 +126,15 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
     global ruby.api_version ruby.lib ruby.suffix ruby.bindir ruby.gemdir
     global ruby.module ruby.filename ruby.project ruby.docs ruby.srcdir
     global ruby.link_binaries_suffix
+    # ruby.version is obsoleted. use ruby.gemdir.
+    global ruby.prog_suffix
 
     if {${implementation} eq "ruby19"} {
         ruby.branch 1.9
+        set ruby.prog_suffix 1.9
     } elseif {${implementation} eq "ruby"} {
         ruby.branch 1.8
+        set ruby.prog_suffix ""
     } else {
         ui_error "ruby.setup: unknown implementation '${implementation}' specified (ruby, ruby19 possible)"
         return -code error "ruby.setup failed"
