@@ -62,22 +62,24 @@
 options ruby.default_branch
 default ruby.default_branch 1.8
 options ruby.branch
-options ruby.bin ruby.rdoc ruby.gem ruby.bindir ruby.suffix
+options ruby.bin ruby.rdoc ruby.gem ruby.bindir ruby.gemdir ruby.suffix
 option_proc ruby.branch ruby_set_branch
 proc ruby_set_branch {option action args} {
     if {$action != "set"} {
         return
     }
     global prefix ruby.branch \
-           ruby.bin ruby.rdoc ruby.gem ruby.bindir \
-           ruby.suffix ruby.link_binaries_suffix
+           ruby.bin ruby.rdoc ruby.gem ruby.bindir ruby.gemdir \
+           ruby.suffix ruby.link_binaries_suffix ruby.api_version
     set ruby.bin            ${prefix}/bin/ruby${ruby.branch}
     set ruby.rdoc           ${prefix}/bin/rdoc${ruby.branch}
     set ruby.gem            ${prefix}/bin/gem${ruby.branch}
     set ruby.bindir         ${prefix}/libexec/ruby${ruby.branch}
+    set ruby.gemdir         ${prefix}/lib/ruby${ruby.branch}/gems/${ruby.api_version}
     # gem command for 1.8 from port:rb-rubygems
     if {${ruby.branch} eq "1.8"} {
         set ruby.gem        ${ruby.bindir}/gem
+        set ruby.gemdir     ${prefix}/lib/ruby/gems/${ruby.api_version}
     }
     set ruby.suffix         [join [split ${ruby.branch} .] {}]
     if {${ruby.branch} eq "1.8"} {
@@ -86,7 +88,6 @@ proc ruby_set_branch {option action args} {
     set ruby.link_binaries_suffix -${ruby.branch}
     set ruby.prog_suffix    ${ruby.branch}
 }
-default ruby.branch ${ruby.default_branch}
 
 proc ruby.extract_config {var {default ""}} {
     global ruby.bin
@@ -115,13 +116,15 @@ set ruby.srcdir         ""
 options ruby.link_binaries
 default ruby.link_binaries yes
 
+default ruby.branch         ${ruby.default_branch}
+
 # ruby group setup procedure; optional for ruby 1.8 if you want only
 # basic variables, like ruby.lib and ruby.archlib.
 proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {implementation "ruby"}} {
     global destroot prefix worksrcpath os.platform
     global ruby.bin ruby.rdoc ruby.gem
-    global ruby.api_version ruby.lib ruby.suffix
-    global ruby.module ruby.filename ruby.project ruby.docs ruby.srcdir ruby.bindir
+    global ruby.api_version ruby.lib ruby.suffix ruby.bindir ruby.gemdir
+    global ruby.module ruby.filename ruby.project ruby.docs ruby.srcdir
     global ruby.link_binaries_suffix
 
     if {${implementation} eq "ruby19"} {
@@ -366,13 +369,13 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
             build {}
 
             pre-destroot {
-                xinstall -d -m 0755 ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.api_version}
+                xinstall -d -m 0755 ${destroot}${ruby.gemdir}
             }
 
             destroot {
-                system "cd ${worksrcpath} && ${ruby.gem} install --local --force --install-dir ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.api_version} ${distpath}/${distname}"
+                system "cd ${worksrcpath} && ${ruby.gem} install --no-ri --no-rdoc --local --force --install-dir ${destroot}${ruby.gemdir} ${distpath}/${distname}"
 
-                set binDir ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.api_version}/bin
+                set binDir ${destroot}${ruby.gemdir}/bin
                 if {[file isdirectory $binDir]} {
                     foreach file [readdir $binDir] {
                         file copy [file join $binDir $file] ${destroot}${ruby.bindir}
