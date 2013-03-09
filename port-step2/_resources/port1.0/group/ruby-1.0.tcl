@@ -104,7 +104,7 @@ default ruby.lib            {[ruby.extract_config vendorlibdir ${prefix}/lib/rub
 default ruby.archlib        {[ruby.extract_config vendorarchdir ${ruby.lib}/${ruby.arch}]}
 # ruby.version is obsoleted. use ruby.api_version.
 options ruby.version
-default ruby.version        ruby.api_version
+default ruby.version        {[ruby.extract_config ruby_version]}
 
 set ruby.module         ""
 set ruby.filename       ""
