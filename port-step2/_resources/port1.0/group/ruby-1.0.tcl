@@ -30,24 +30,60 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-options ruby.default_branch
-default ruby.default_branch {[ruby_get_default_branch]}
-proc ruby_get_default_branch {} {
-    global prefix
-    # use whatever ${prefix}/bin/ruby was chosen, and if none, fall back to 1.8
-    if {![catch {set val [lindex [split [exec ${prefix}/bin/ruby --version] { }] 1]}]} {
-        return [join [lrange [split $val .] 0 1] .]
-    } else {
-        return 1.8
-    }
-}
+# Usage:
+#
+#   1. use ruby.setup
+#
+#     PortGroup        ruby 1.0
+#     ruby.setup       module version type {} ruby19
+#
+#   2. use ruby.branch
+#
+#     PortGroup        ruby 1.0
+#     ruby.branch      1.9
+#     depends_lib      port:ruby${ruby.suffix}
+#     build.cmd        ${ruby.bin}
 
-# Define these variables assuming ruby1.8 to make them accessible in
-# the portfile after port group declaration. They can be modified by
-# ruby.setup, e.g. to use another ruby than 1.8.
-set ruby.bin            ${prefix}/bin/ruby${ruby.default_branch}
-set ruby.rdoc           ${prefix}/bin/rdoc${ruby.default_branch}
-set ruby.gem            ${prefix}/bin/gem${ruby.default_branch}
+# options:
+#   ruby.branch: select ruby version. 1.8 or 1.9.
+#   ruby.link_binaries: whether generate suffixed symlink under ${prefix}/bin or not.
+# values:
+#   ruby.bin, ruby.rdoc, ruby.gem: full path of ruby, rdoc, gem for ${ruby.branch}.
+#   ruby.suffix: suffix of portname. port:ruby${ruby.suffix} or port:rb${ruby.suffix}-foo.
+#   ruby.bindir: install location of commands without suffix from rb-foo.
+#   ruby.link_binaries_suffix: suffix of commands from rb-foo under ${prefix}/bin.
+#   ruby.prog_suffix: obsoleted. use ruby.branch.
+# values from ruby.setup:
+#   ruby.module: port name without prefix. rb-${ruby.module}.
+#   ruby.project: project name at rubygems.org, rubyforge.org or sourceforge.net.
+
+options ruby.default_branch
+default ruby.default_branch 1.8
+options ruby.branch
+option_proc ruby.branch ruby_set_branch
+proc ruby_set_branch {option action args} {
+    if {$action != "set"} {
+        return
+    }
+    global prefix ruby.branch \
+           ruby.bin ruby.rdoc ruby.gem ruby.bindir \
+           ruby.suffix ruby.link_binaries_suffix
+    set ruby.bin            ${prefix}/bin/ruby${ruby.branch}
+    set ruby.rdoc           ${prefix}/bin/rdoc${ruby.branch}
+    set ruby.gem            ${prefix}/bin/gem${ruby.branch}
+    set ruby.bindir         ${prefix}/libexec/ruby${ruby.branch}
+    # gem command for 1.8 from port:rb-rubygems
+    if {${ruby.branch} eq "1.8"} {
+        set ruby.gem        ${ruby.bindir}/gem
+    }
+    set ruby.suffix         [join [split ${ruby.branch} .] {}]
+    if {${ruby.branch} eq "1.8"} {
+        set ruby.suffix     ""
+    }
+    set ruby.link_binaries_suffix -${ruby.branch}
+    set ruby.prog_suffix    ${ruby.branch}
+}
+default ruby.branch ${ruby.default_branch}
 
 proc ruby.extract_config {var {default ""}} {
     global ruby.bin
@@ -69,7 +105,6 @@ set ruby.filename   ""
 set ruby.project    ""
 set ruby.docs       {}
 set ruby.srcdir     ""
-set ruby.bindir     ""
 
 options ruby.link_binaries
 default ruby.link_binaries yes
@@ -81,27 +116,16 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
     global ruby.bin ruby.rdoc ruby.gem
     global ruby.version ruby.lib
     global ruby.module ruby.filename ruby.project ruby.docs ruby.srcdir ruby.bindir
-    global ruby.prog_suffix
     global ruby.link_binaries_suffix
 
     if {${implementation} eq "ruby19"} {
-        set ruby.port_prefix rb19
-        set ruby.prog_suffix "1.9"
-        set ruby.libexec_suffix "1.9"
+        ruby.branch 1.9
     } elseif {${implementation} eq "ruby"} {
-        # ruby.bin, ruby.rdoc, and ruby.gem set to 1.8 by default
-        set ruby.port_prefix rb
-        set ruby.prog_suffix "1.8"
-        set ruby.libexec_suffix "1.8"
+        ruby.branch 1.8
     } else {
         ui_error "ruby.setup: unknown implementation '${implementation}' specified (ruby, ruby19 possible)"
         return -code error "ruby.setup failed"
     }
-    set ruby.bin    ${prefix}/bin/ruby${ruby.prog_suffix}
-    set ruby.rdoc   ${prefix}/bin/rdoc${ruby.prog_suffix}
-    set ruby.gem    ${prefix}/bin/gem${ruby.prog_suffix}
-    set ruby.bindir ${prefix}/libexec/ruby${ruby.libexec_suffix}
-    set ruby.link_binaries_suffix -${ruby.libexec_suffix}
 
     # define ruby global names and lists
     # check if module is a list or string
@@ -119,7 +143,7 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
     }
     set ruby.docs   ${docs}
 
-    name            ${ruby.port_prefix}-[string tolower ${ruby.module}]
+    name            rb${ruby.suffix}-[string tolower ${ruby.module}]
     version         ${vers}
     categories      ruby
 
@@ -331,13 +355,13 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
             build {}
 
             pre-destroot {
-                xinstall -d -m 0755 ${destroot}${prefix}/lib/ruby${ruby.prog_suffix}/gems/${ruby.version}
+                xinstall -d -m 0755 ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.version}
             }
 
             destroot {
-                system "cd ${worksrcpath} && ${ruby.gem} install --local --force --install-dir ${destroot}${prefix}/lib/ruby${ruby.prog_suffix}/gems/${ruby.version} ${distpath}/${distname}"
+                system "cd ${worksrcpath} && ${ruby.gem} install --local --force --install-dir ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.version} ${distpath}/${distname}"
 
-                set binDir ${destroot}${prefix}/lib/ruby${ruby.prog_suffix}/gems/${ruby.version}/bin
+                set binDir ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.version}/bin
                 if {[file isdirectory $binDir]} {
                     foreach file [readdir $binDir] {
                         file copy [file join $binDir $file] ${destroot}${ruby.bindir}
