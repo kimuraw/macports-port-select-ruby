@@ -109,7 +109,7 @@ Note
 
 added options:
 
-* ruby.default_branch - decide ${ruby.bin} without "ruby.setup". "1.8" or "1.9".
+* ruby.branch - decide ${ruby.bin} without "ruby.setup". "1.8" or "1.9".
 * ruby.link_binaries - whether generate suffixed symlink under ${prefix}/bin or not. "yes" (default) or "no".
 
 port samples of each style:
