@@ -72,6 +72,38 @@ Step 2: introduce `port select ruby`
     * add PortGroup select
 * add port:ruby_select
 
+ports affected from this changes
+--------------------------------
+
+uses ${prefix}/bin/ruby:
+
+    % pwd
+    /opt/local/var/macports/sources/rsync.macports.org/release/tarballs/ports
+    % ack -a -G Portfile 'bin\/ruby' --ignore-dir=ruby
+    databases/pqa/Portfile
+    23:	reinplace "s|/usr/local/bin/ruby|/usr/bin/env ruby|g" \
+    
+    devel/subversion-rubybindings/Portfile
+    40:configure.env		RUBY=${prefix}/bin/ruby
+    
+    editors/MacVim/Portfile
+    162:    configure.args-append   --with-ruby-command=${prefix}/bin/ruby
+    167:    configure.args-append   --with-ruby-command=${prefix}/bin/ruby1.9
+    
+    editors/vim/Portfile
+    968:    configure.args-append   --with-ruby-command=${prefix}/bin/ruby
+    973:    configure.args-append   --with-ruby-command=${prefix}/bin/ruby1.9
+    
+    editors/vim-app/Portfile
+    987:    configure.args-append   --with-ruby-command=${prefix}/bin/ruby
+    992:    configure.args-append   --with-ruby-command=${prefix}/bin/ruby1.9
+    
+    sysutils/facter/Portfile
+    36:destroot.cmd        ${prefix}/bin/ruby ${worksrcpath}/install.rb \
+    
+    sysutils/puppet/Portfile
+    35:destroot.cmd        ${prefix}/bin/ruby ${worksrcpath}/install.rb \
+
 Note
 ----
 
