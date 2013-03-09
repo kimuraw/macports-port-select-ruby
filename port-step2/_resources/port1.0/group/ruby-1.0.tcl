@@ -52,7 +52,9 @@
 #   ruby.suffix: suffix of portname. port:ruby${ruby.suffix} or port:rb${ruby.suffix}-foo.
 #   ruby.bindir: install location of commands without suffix from rb-foo.
 #   ruby.link_binaries_suffix: suffix of commands from rb-foo under ${prefix}/bin.
-#   ruby.prog_suffix: obsoleted. use ruby.branch.
+#   (obsoleted values)
+#   ruby.prog_suffix: use ruby.branch.
+#   ruby.version: use ruby.api_version.
 # values from ruby.setup:
 #   ruby.module: port name without prefix. rb-${ruby.module}.
 #   ruby.project: project name at rubygems.org, rubyforge.org or sourceforge.net.
