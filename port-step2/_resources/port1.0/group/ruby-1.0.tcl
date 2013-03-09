@@ -301,7 +301,7 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
         }
         setup.rb {
             configure.cmd       ${ruby.bin} -rvendor-specific setup.rb
-            configure.pre_args  config --bindir=${ruby.bindir}
+            configure.pre_args  config
 
             build.cmd           ${ruby.bin} -rvendor-specific setup.rb
             build.target        setup
@@ -319,6 +319,11 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
             destroot.cmd        ${ruby.bin} -rvendor-specific setup.rb
             destroot.target     install
             destroot.destdir
+            post-destroot {
+                foreach file [readdir ${destroot}${prefix}/bin] {
+                    move [file join ${destroot}${prefix}/bin $file] ${destroot}${ruby.bindir}
+                }
+            }
         }
         extconf.rb {
             configure.cmd       ${ruby.bin} -rvendor-specific extconf.rb
