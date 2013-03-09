@@ -72,8 +72,8 @@ Step 2: introduce `port select ruby`
     * add PortGroup select
 * add port:ruby_select
 
-ports affected from this changes
---------------------------------
+ports might be affected from this changes
+-----------------------------------------
 
 uses ${prefix}/bin/ruby:
 
@@ -103,6 +103,42 @@ uses ${prefix}/bin/ruby:
     
     sysutils/puppet/Portfile
     35:destroot.cmd        ${prefix}/bin/ruby ${worksrcpath}/install.rb \
+
+these ports need to change ${prefix}/bin/ruby -> ${ruby.bin} or ${prefix}/bin/ruby1.8.
+
+depends_lib for port:ruby*:
+
+    % ack -a -G Portfile -l 'port:ruby' --ignore-dir=ruby | cut -d/ -f1-2
+    audio/liblastfm
+    audio/xmms2
+    databases/pqa
+    devel/subversion-rubybindings
+    devel/swig
+    devel/thrift
+    devel/thrift-devel
+    devel/xapian-bindings
+    editors/MacVim
+    editors/vim
+    editors/vim-app
+    graphics/graphviz
+    graphics/graphviz-devel
+    irc/weechat
+    kde/koffice
+    kde/qtruby
+    multimedia/mkvtoolnix
+    print/pdflib
+    science/root
+    security/metasploit3
+    sysutils/facter
+    sysutils/puppet
+    textproc/ohcount
+    www/elinks-devel
+    www/eruby
+    www/mod_ruby
+    www/redland-bindings
+
+* linking libruby: not affected.
+* auto detect `ruby': might specify path to ${ruby.bin}.
 
 Note
 ----
