@@ -60,6 +60,7 @@
 options ruby.default_branch
 default ruby.default_branch 1.8
 options ruby.branch
+options ruby.bin ruby.rdoc ruby.gem ruby.bindir ruby.suffix
 option_proc ruby.branch ruby_set_branch
 proc ruby_set_branch {option action args} {
     if {$action != "set"} {
@@ -93,18 +94,21 @@ proc ruby.extract_config {var {default ""}} {
     return $val
 }
 
-options ruby.version ruby.arch ruby.lib ruby.archlib
-default ruby.version    {[ruby.extract_config ruby_version]}
-default ruby.arch       {[ruby.extract_config arch "${os.arch}-${os.platform}${os.major}"]}
+options ruby.api_version ruby.lib ruby.archlib
+default ruby.api_version    {[ruby.extract_config ruby_version]}
+default ruby.arch           {[ruby.extract_config arch "${os.arch}-${os.platform}${os.major}"]}
 # define installation libraries as vendor location
-default ruby.lib        {[ruby.extract_config vendorlibdir ${prefix}/lib/ruby/vendor_ruby/${ruby.version}]}
-default ruby.archlib    {[ruby.extract_config vendorarchdir ${ruby.lib}/${ruby.arch}]}
+default ruby.lib            {[ruby.extract_config vendorlibdir ${prefix}/lib/ruby/vendor_ruby/${ruby.api_version}]}
+default ruby.archlib        {[ruby.extract_config vendorarchdir ${ruby.lib}/${ruby.arch}]}
+# ruby.version is obsoleted. use ruby.api_version.
+options ruby.version
+default ruby.version        ruby.api_version
 
-set ruby.module     ""
-set ruby.filename   ""
-set ruby.project    ""
-set ruby.docs       {}
-set ruby.srcdir     ""
+set ruby.module         ""
+set ruby.filename       ""
+set ruby.project        ""
+set ruby.docs           {}
+set ruby.srcdir         ""
 
 options ruby.link_binaries
 default ruby.link_binaries yes
@@ -114,7 +118,7 @@ default ruby.link_binaries yes
 proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {implementation "ruby"}} {
     global destroot prefix worksrcpath os.platform
     global ruby.bin ruby.rdoc ruby.gem
-    global ruby.version ruby.lib
+    global ruby.api_version ruby.lib ruby.suffix
     global ruby.module ruby.filename ruby.project ruby.docs ruby.srcdir ruby.bindir
     global ruby.link_binaries_suffix
 
@@ -355,13 +359,13 @@ proc ruby.setup {module vers {type "install.rb"} {docs {}} {source "custom"} {im
             build {}
 
             pre-destroot {
-                xinstall -d -m 0755 ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.version}
+                xinstall -d -m 0755 ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.api_version}
             }
 
             destroot {
-                system "cd ${worksrcpath} && ${ruby.gem} install --local --force --install-dir ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.version} ${distpath}/${distname}"
+                system "cd ${worksrcpath} && ${ruby.gem} install --local --force --install-dir ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.api_version} ${distpath}/${distname}"
 
-                set binDir ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.version}/bin
+                set binDir ${destroot}${prefix}/lib/ruby${ruby.branch}/gems/${ruby.api_version}/bin
                 if {[file isdirectory $binDir]} {
                     foreach file [readdir $binDir] {
                         file copy [file join $binDir $file] ${destroot}${ruby.bindir}
